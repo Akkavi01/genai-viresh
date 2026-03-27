@@ -9,3 +9,5 @@ python-dotenv
 PyPDF2
 openpyxl
 gunicorn
+fastapi
+uvicorn
