@@ -6,3 +6,6 @@ python-dotenv
 gunicorn
 fastapi
 uvicorn
+streamlit
+pandas
+
