@@ -8,3 +8,4 @@ langchain-text-splitters
 python-dotenv
 PyPDF2
 openpyxl
+gunicorn
