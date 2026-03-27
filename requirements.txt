@@ -1,13 +1,8 @@
-streamlit
-pandas
-faiss-cpu
 langchain-community
 langchain-core
 langchain-openai
 langchain-text-splitters
 python-dotenv
-PyPDF2
-openpyxl
 gunicorn
 fastapi
 uvicorn
