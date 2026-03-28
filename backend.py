@@ -1,49 +1,56 @@
-from langchain_text_splitters import CharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
-from langchain_community.vectorstores import Chroma
-
+from langchain_openai import ChatOpenAI
 import os
 
 
 def create_qa_system_from_docs(documents):
     try:
-        # 🔍 Debug: Check API key
+        # ✅ Validate API Key
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
             raise ValueError("OPENAI_API_KEY is missing!")
 
         print("✅ API Key loaded")
 
-        # 📄 Split documents
-        text_splitter = CharacterTextSplitter(
-            chunk_size=500,
-            chunk_overlap=50
-        )
-        texts = text_splitter.split_documents(documents)
+        # 📄 Combine all documents into one context
+        full_text = "\n\n".join([doc.page_content for doc in documents])
 
-        print(f"✅ Split into {len(texts)} chunks")
+        print(f"✅ Documents combined. Length: {len(full_text)}")
 
-        # 🔗 Embeddings
-        embeddings = OpenAIEmbeddings()
-
-        # 📦 Vector Store (FAISS)
-        vectorstore = Chroma.from_documents(texts, embeddings)
-
-        print("✅ Vector store created")
-
-        # 🔍 Retriever
-        retriever = vectorstore.as_retriever()
-
-        # 🤖 LLM
+        # 🤖 Initialize LLM
         llm = ChatOpenAI(
             temperature=0,
-            model="gpt-3.5-turbo"   # safe default
+            model="gpt-3.5-turbo"
         )
 
         print("✅ LLM initialized")
 
-        return retriever, llm
+        # 🔍 Simple QA function (no vector DB)
+        def qa_system(query):
+            try:
+                prompt = f"""
+You are a helpful assistant. Answer the question using the context below.
+
+Context:
+{full_text}
+
+Question:
+{query}
+
+Answer:
+"""
+
+                response = llm.invoke(prompt)
+
+                print("✅ Response generated")
+
+                return response.content
+
+            except Exception as e:
+                print("❌ Error during QA:", str(e))
+                return f"Error: {str(e)}"
+
+        return qa_system
 
     except Exception as e:
-        print("❌ ERROR in backend:", str(e))
+        print("❌ Backend initialization error:", str(e))
         raise e
