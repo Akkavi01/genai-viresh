@@ -1,6 +1,6 @@
 from langchain_text_splitters import CharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
-from langchain_community.vectorstores import FAISS
+from langchain_community.vectorstores import Chroma
 
 import os
 
@@ -27,7 +27,7 @@ def create_qa_system_from_docs(documents):
         embeddings = OpenAIEmbeddings()
 
         # 📦 Vector Store (FAISS)
-        vectorstore = FAISS.from_documents(texts, embeddings)
+        vectorstore = Chroma.from_documents(texts, embeddings)
 
         print("✅ Vector store created")
 
