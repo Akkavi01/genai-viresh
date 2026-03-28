@@ -3,9 +3,5 @@ langchain-core
 langchain-openai
 langchain-text-splitters
 python-dotenv
-gunicorn
-fastapi
-uvicorn
 streamlit
 pandas
-
