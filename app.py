@@ -1,6 +1,6 @@
 import streamlit as st
 from backend import create_qa_system_from_docs
-from langchain.document_loaders import PyPDFLoader, TextLoader
+from langchain_community.document_loaders import PyPDFLoader, TextLoader
 import tempfile
 import os
 
@@ -15,9 +15,9 @@ uploaded_files = st.file_uploader(
     accept_multiple_files=True
 )
 
-if uploaded_files:
-    documents = []
+documents = []
 
+if uploaded_files:
     for file in uploaded_files:
         try:
             # Save temp file
@@ -34,7 +34,6 @@ if uploaded_files:
             docs = loader.load()
             documents.extend(docs)
 
-            # Clean temp file
             os.remove(tmp_path)
 
         except Exception as e:
