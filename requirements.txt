@@ -1,7 +1,2 @@
-langchain-community
-langchain-core
-langchain-openai
-langchain-text-splitters
-python-dotenv
 streamlit
-pandas
+
