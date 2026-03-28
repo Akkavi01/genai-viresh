@@ -3,26 +3,47 @@ from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_community.vectorstores import FAISS
 
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
 
 def create_qa_system_from_docs(documents):
-    # Split documents
-    text_splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=50)
-    texts = text_splitter.split_documents(documents)
+    try:
+        # 🔍 Debug: Check API key
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY is missing!")
 
-    # Create embeddings
-    embeddings = OpenAIEmbeddings()
+        print("✅ API Key loaded")
 
-    # Create vector store
-    vectorstore = FAISS.from_documents(texts, embeddings)
+        # 📄 Split documents
+        text_splitter = CharacterTextSplitter(
+            chunk_size=500,
+            chunk_overlap=50
+        )
+        texts = text_splitter.split_documents(documents)
 
-    # Create retriever
-    retriever = vectorstore.as_retriever()
+        print(f"✅ Split into {len(texts)} chunks")
 
-    # LLM
-    llm = ChatOpenAI()
+        # 🔗 Embeddings
+        embeddings = OpenAIEmbeddings()
 
-    # Return both
-    return retriever, llm
+        # 📦 Vector Store (FAISS)
+        vectorstore = FAISS.from_documents(texts, embeddings)
+
+        print("✅ Vector store created")
+
+        # 🔍 Retriever
+        retriever = vectorstore.as_retriever()
+
+        # 🤖 LLM
+        llm = ChatOpenAI(
+            temperature=0,
+            model="gpt-3.5-turbo"   # safe default
+        )
+
+        print("✅ LLM initialized")
+
+        return retriever, llm
+
+    except Exception as e:
+        print("❌ ERROR in backend:", str(e))
+        raise e
