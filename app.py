@@ -8,7 +8,6 @@ st.set_page_config(page_title="GenAI Multi-Doc Q&A")
 
 st.title("📄 GenAI Multi-Document Q&A")
 
-# Upload files
 uploaded_files = st.file_uploader(
     "Upload documents (PDF or TXT)",
     type=["pdf", "txt"],
@@ -20,12 +19,10 @@ documents = []
 if uploaded_files:
     for file in uploaded_files:
         try:
-            # Save temp file
             with tempfile.NamedTemporaryFile(delete=False) as tmp:
                 tmp.write(file.read())
                 tmp_path = tmp.name
 
-            # Load document
             if file.name.endswith(".pdf"):
                 loader = PyPDFLoader(tmp_path)
             else:
@@ -41,25 +38,39 @@ if uploaded_files:
 
     if st.button("Process Documents"):
         try:
-            qa_chain = create_qa_system_from_docs(documents)
-            st.session_state.qa_chain = qa_chain
+            retriever, llm = create_qa_system_from_docs(documents)
+            st.session_state.retriever = retriever
+            st.session_state.llm = llm
             st.success("Documents processed successfully!")
         except Exception as e:
             st.error(f"Processing error: {e}")
 
-# Q&A Section
-if "qa_chain" in st.session_state:
+# Q&A
+if "retriever" in st.session_state:
     st.subheader("Ask Questions")
 
     query = st.text_input("Enter your question:")
 
     if st.button("Get Answer"):
-        if query.strip() == "":
-            st.warning("Please enter a question.")
-        else:
-            try:
-                response = st.session_state.qa_chain.run(query)
-                st.write("### Answer:")
-                st.write(response)
-            except Exception as e:
-                st.error(f"Error: {e}")
+        try:
+            docs = st.session_state.retriever.invoke(query)
+
+            context = "\n\n".join([doc.page_content for doc in docs])
+
+            prompt = f"""
+            Answer the question based on the context below.
+
+            Context:
+            {context}
+
+            Question:
+            {query}
+            """
+
+            response = st.session_state.llm.invoke(prompt)
+
+            st.write("### Answer:")
+            st.write(response.content)
+
+        except Exception as e:
+            st.error(f"Error: {e}")
